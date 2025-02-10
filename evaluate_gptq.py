@@ -4,7 +4,6 @@ from tqdm import tqdm
 import pandas as pd
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import torch
-from learn_to_quant import eval_utils
 import wandb
 import json
 import os
