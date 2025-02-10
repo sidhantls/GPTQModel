@@ -28,7 +28,7 @@ import torch.nn as nn
 from packaging import version
 from packaging.version import Version
 from transformers import AutoModelForCausalLM, PreTrainedModel, PreTrainedTokenizerBase, modeling_utils
-from tokenicer import Tokenicer
+from tokenizers import Tokenizer
 
 from ..nn_modules.hooked_linear import replace_linear_with_hooked_linear
 from ..quantization import GPTQ, QuantizeConfig
@@ -129,7 +129,7 @@ class BaseGPTQModel(nn.Module):
         self.load_quantized_model = load_quantized_model
         if tokenizer is not None:
             if isinstance(tokenizer, PreTrainedTokenizerBase):
-                self.tokenizer = Tokenicer.load(tokenizer)
+                self.tokenizer = Tokenizer.load(tokenizer)
             else:
                 raise ValueError(
                     f"Unsupported `tokenizer` type: Expected `PreTrainedTokenizerBase`, actual = `{type(tokenizer)}`.")
