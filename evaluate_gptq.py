@@ -104,10 +104,9 @@ if __name__ == '__main__':
         "allenai/c4",
         data_files="en/c4-train.00001-of-01024.json.gz",
         split="train"
-    ).select(range(1024))["text"]
+    ).select(range(1024//2))["text"]
 
-    if args.debug: 
-        calibration_dataset = [" ".join(item.split()[:30]) for item in calibration_dataset] # speedup
+    # calibration_dataset = [" ".join(item.split()[:20]) for item in calibration_dataset] # speedup
 
     quantize_config = QuantizeConfig(
         bits=args.bits, # works with bit=4
@@ -119,13 +118,25 @@ if __name__ == '__main__':
 
     # increase `batch_size` to match gpu/vram specs to speed up quantization
     model.quantize(calibration_dataset, batch_size=args.batch_size)
+    
+    save_path = "quantized_model"
+    if args.cache_dir: 
+      save_path = os.path.join(args.cache_dir, save_path)
+
+    model.save(save_path)
+
+    del model
+    del tokenizer
+    model = GPTQModel.load(save_path)
 
     all_metrics = {} 
 
     # Evaluate with harnes
-    print(f'Evaluating model on device: {model.device}')
-    harness_metrics = evaluate_with_harness_full(model, tokenizer, model.device, debug=args.debug, batch_size=args.batch_size)
-    all_metrics['eval_metrics'] = harness_metrics
 
+    harness_metrics = evaluate_with_harness_full(model, model.tokenizer.tokenizer, model.device, debug=args.debug, batch_size=args.batch_size)
+
+    all_metrics['harness_metrics'] = harness_metrics
     # Finish Weights and Biases run
+
+    print(all_metrics)
     wandb.finish()
