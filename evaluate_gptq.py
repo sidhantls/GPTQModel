@@ -19,6 +19,10 @@ from lm_eval import simple_evaluate
 import torch 
 
 import datasets
+from huggingface_hub.utils import disable_progress_bars
+
+# Disable progress bars globally
+disable_progress_bars()
 
 datasets.config.HF_DATASETS_TRUST_REMOTE_CODE=True
 
